@@ -210,7 +210,6 @@ RUN set -x \
 		echo '[www]'; \
 		echo 'listen = 9000'; \
 	} | tee php-fpm.d/zz-docker.conf \
-	&& echo "include=/etc/php-fpm.d/*.conf" > /usr/local/etc/php-fpm.conf \
   && { \
       echo 'opcache.memory_consumption=128'; \
       echo 'opcache.interned_strings_buffer=8'; \
