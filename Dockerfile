@@ -98,8 +98,7 @@ RUN set -xe \
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
-ENV PHPREDIS_VERSION 4.2.0
-ENV COMPOSER_VERSION 1.8.0
+ENV COMPOSER_VERSION 1.8.3
 
 RUN apk add --no-cache \
      libzip \
@@ -119,15 +118,14 @@ RUN apk add --no-cache \
      gettext-dev \
      icu-dev \
      libxslt-dev \
-  && docker-php-source extract && touch /usr/src/php/.docker-delete-me \
-  && curl -L -o /tmp/redis.tar.gz https://github.com/phpredis/phpredis/archive/$PHPREDIS_VERSION.tar.gz \
-  && tar xfz /tmp/redis.tar.gz \
-  && rm -r /tmp/redis.tar.gz \
-  && mv phpredis-$PHPREDIS_VERSION /usr/src/php/ext/redis \
+     tidyhtml-dev \
+     imagemagick-dev \
   && docker-php-ext-configure gd \
     --with-freetype-dir=/usr/include/ \
     --with-jpeg-dir=/usr/include/ \
     --with-png-dir=/usr/include/ \
+  && docker-php-ext-configure opcache \
+    --enable-opcache \
   && docker-php-ext-install \
     exif \
     gettext \
@@ -142,14 +140,17 @@ RUN apk add --no-cache \
     zip \
     pdo_mysql \
     mysqli \
+    pdo_pgsql \
+    pgsql \
     gd \
     opcache \
-    redis \
     xmlrpc \
     bcmath \
     sockets \
-  && docker-php-ext-enable \
-    sodium \
+    tidy \
+  && pecl install redis && docker-php-ext-enable redis \
+  && pecl install imagick && docker-php-ext-enable imagick \
+  && docker-php-ext-enable sodium \
   && curl -L -o /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar \
   && chmod a+x /usr/local/bin/composer
 
@@ -157,14 +158,6 @@ RUN apk add --no-cache \
 FROM alpine:3.9
 
 COPY --from=builder /usr/local/ /usr/local/
-
-RUN runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/ \
-			| tr ',' '\n' \
-			| sort -u \
-			| awk 'system("[ -e /usr/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-	)" \
-	&& apk --no-cache add $runDeps
 
 RUN set -x \
   && runDeps="$( \
