@@ -101,25 +101,19 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 ENV COMPOSER_VERSION 1.8.3
 
 RUN apk add --no-cache \
-     libzip \
-     openssl \
-     freetype \
-     libpng \
-     libjpeg-turbo \
-     libintl \
-     icu \
-     libxslt \
-     libzip-dev \
-     openssl-dev \
-     freetype-dev \
-     libpng-dev \
-     libjpeg-turbo-dev \
-     libxml2-dev \
-     gettext-dev \
-     icu-dev \
-     libxslt-dev \
-     tidyhtml-dev \
-     imagemagick-dev \
+    libzip libzip-dev \
+    openssl openssl-dev \
+    freetype freetype-dev \
+    libpng libpng-dev \
+    libjpeg-turbo libjpeg-turbo-dev \
+    libintl \
+    icu icu-dev \
+    libxslt libxslt-dev \
+    libpq-dev \
+    libxml2-dev \
+    gettext-dev \
+    tidyhtml-dev \
+    imagemagick-dev \
   && docker-php-ext-configure gd \
     --with-freetype-dir=/usr/include/ \
     --with-jpeg-dir=/usr/include/ \
@@ -127,27 +121,27 @@ RUN apk add --no-cache \
   && docker-php-ext-configure opcache \
     --enable-opcache \
   && docker-php-ext-install \
+    bcmath \
     exif \
+    gd \
     gettext \
     iconv \
     intl \
-    pcntl \
-    shmop \
-    soap \
-    sysvsem \
-    tokenizer \
-    xsl \
-    zip \
-    pdo_mysql \
     mysqli \
+    opcache \
+    pcntl \
+    pdo_mysql \
     pdo_pgsql \
     pgsql \
-    gd \
-    opcache \
-    xmlrpc \
-    bcmath \
+    shmop \
+    soap \
     sockets \
+    sysvsem \
     tidy \
+    tokenizer \
+    xmlrpc \
+    xsl \
+    zip \
   && pecl install redis && docker-php-ext-enable redis \
   && pecl install imagick && docker-php-ext-enable imagick \
   && docker-php-ext-enable sodium \
