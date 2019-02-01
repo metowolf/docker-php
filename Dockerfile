@@ -109,11 +109,11 @@ RUN apk add --no-cache \
     libintl \
     icu icu-dev \
     libxslt libxslt-dev \
-    libpq-dev \
     libxml2-dev \
     gettext-dev \
     tidyhtml-dev \
     imagemagick-dev \
+    postgresql-dev \
   && docker-php-ext-configure gd \
     --with-freetype-dir=/usr/include/ \
     --with-jpeg-dir=/usr/include/ \
