@@ -2,7 +2,7 @@ FROM alpine:3.9 as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
-ENV PHP_VERSION 7.3.1
+ENV PHP_VERSION 7.3.2
 ENV GPG_KEYS CBAF69F173A0FEA4B537F470D66C9593118BCCB6
 
 RUN apk add --no-cache gnupg1 curl \
