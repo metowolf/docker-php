@@ -2,8 +2,8 @@ FROM alpine:3.9 as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
-ENV PHP_VERSION 7.3.2
-ENV GPG_KEYS CBAF69F173A0FEA4B537F470D66C9593118BCCB6
+ARG PHP_VERSION=7.3.3
+ARG GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6
 
 RUN apk add --no-cache gnupg1 curl \
   && mkdir -p /usr/src \
@@ -98,7 +98,7 @@ RUN set -xe \
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
-ENV COMPOSER_VERSION 1.8.3
+ENV COMPOSER_VERSION 1.8.4
 
 RUN apk add --no-cache \
     libzip libzip-dev \
