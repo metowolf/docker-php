@@ -49,18 +49,18 @@ RUN set -xe \
     sqlite-dev \
   \
   && export CFLAGS="-fstack-protector-strong -fpic -fpie -O3" \
-		CPPFLAGS="-fstack-protector-strong -fpic -fpie -O3" \
-		LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie" \
-	&& docker-php-source extract \
-	&& cd /usr/src/php \
+    CPPFLAGS="-fstack-protector-strong -fpic -fpie -O3" \
+    LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie" \
+  && docker-php-source extract \
+  && cd /usr/src/php \
   \
   && mkdir -p $PHP_INI_DIR/conf.d \
   && addgroup -g 82 -S www-data \
   && adduser -u 82 -D -S -G www-data www-data \
   \
   && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
-	&& ./configure \
-  	--build="$gnuArch" \
+  && ./configure \
+    --build="$gnuArch" \
     --with-config-file-path="$PHP_INI_DIR" \
     --with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
     --enable-option-checking=fatal \
@@ -79,22 +79,22 @@ RUN set -xe \
     --with-fpm-group=www-data \
     --disable-cgi \
   && make -j "$(nproc)" \
-	&& make install \
-	&& { find /usr/local/bin /usr/local/sbin -type f -perm +0111 -exec strip --strip-all '{}' + || true; } \
-	&& make clean \
+  && make install \
+  && { find /usr/local/bin /usr/local/sbin -type f -perm +0111 -exec strip --strip-all '{}' + || true; } \
+  && make clean \
   && cp -v php.ini-* "$PHP_INI_DIR/" \
   && cd / \
-	&& docker-php-source delete \
+  && docker-php-source delete \
   \
-	&& runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
-			| tr ',' '\n' \
-			| sort -u \
-			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-	)" \
-	&& apk add --no-cache $runDeps \
+  && runDeps="$( \
+    scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
+    | tr ',' '\n' \
+    | sort -u \
+    | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+    )" \
+  && apk add --no-cache $runDeps \
   && pecl update-channels \
-	&& rm -rf /tmp/pear ~/.pearrc
+  && rm -rf /tmp/pear ~/.pearrc
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
@@ -152,51 +152,55 @@ RUN apk add --no-cache \
 FROM alpine:3.9
 
 COPY --from=builder /usr/local/ /usr/local/
+COPY docker-entrypoint.sh /usr/local/bin/
+
+WORKDIR /var/www/html
+EXPOSE 9000
 
 RUN set -x \
   && runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/ \
-			| tr ',' '\n' \
-			| sort -u \
-			| awk 'system("[ -e /usr/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-	)" \
-	&& apk --no-cache add $runDeps \
-	&& addgroup -g 48 -S www-data \
-	&& adduser -u 990 -D -S -G www-data www-data \
+    scanelf --needed --nobanner --format '%n#p' --recursive /usr/ \
+    | tr ',' '\n' \
+    | sort -u \
+    | awk 'system("[ -e /usr/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+    )" \
+  && apk --no-cache add $runDeps \
+  && addgroup -g 48 -S www-data \
+  && adduser -u 990 -D -S -G www-data www-data \
   && cd /usr/local/etc \
-	&& if [ -d php-fpm.d ]; then \
-		sed 's!=NONE/!=!g' php-fpm.conf.default | tee php-fpm.conf > /dev/null; \
-		cp php-fpm.d/www.conf.default php-fpm.d/www.conf; \
-	else \
-		mkdir php-fpm.d; \
-		cp php-fpm.conf.default php-fpm.d/www.conf; \
-		{ \
-			echo '[global]'; \
-			echo 'include=etc/php-fpm.d/*.conf'; \
-		} | tee php-fpm.conf; \
-	fi \
-	&& { \
-		echo '[global]'; \
-		echo 'error_log = /proc/self/fd/2'; \
-		echo; echo '; https://github.com/docker-library/php/pull/725#issuecomment-443540114'; echo 'log_limit = 8192'; \
-		echo; \
-		echo '[www]'; \
-		echo '; if we send this to /proc/self/fd/1, it never appears'; \
-		echo 'access.log = /proc/self/fd/2'; \
-		echo; \
-		echo 'clear_env = no'; \
-		echo; \
-		echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
-		echo 'catch_workers_output = yes'; \
-		echo 'decorate_workers_output = no'; \
-	} | tee php-fpm.d/docker.conf \
-	&& { \
-		echo '[global]'; \
-		echo 'daemonize = no'; \
-		echo; \
-		echo '[www]'; \
-		echo 'listen = 9000'; \
-	} | tee php-fpm.d/zz-docker.conf \
+  && if [ -d php-fpm.d ]; then \
+      sed 's!=NONE/!=!g' php-fpm.conf.default | tee php-fpm.conf > /dev/null; \
+      cp php-fpm.d/www.conf.default php-fpm.d/www.conf; \
+    else \
+      mkdir php-fpm.d; \
+      cp php-fpm.conf.default php-fpm.d/www.conf; \
+      { \
+        echo '[global]'; \
+        echo 'include=etc/php-fpm.d/*.conf'; \
+      } | tee php-fpm.conf; \
+    fi \
+  && { \
+      echo '[global]'; \
+      echo 'error_log = /proc/self/fd/2'; \
+      echo; echo '; https://github.com/docker-library/php/pull/725#issuecomment-443540114'; echo 'log_limit = 8192'; \
+      echo; \
+      echo '[www]'; \
+      echo '; if we send this to /proc/self/fd/1, it never appears'; \
+      echo 'access.log = /proc/self/fd/2'; \
+      echo; \
+      echo 'clear_env = no'; \
+      echo; \
+      echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
+      echo 'catch_workers_output = yes'; \
+      echo 'decorate_workers_output = no'; \
+    } | tee php-fpm.d/docker.conf \
+  && { \
+      echo '[global]'; \
+      echo 'daemonize = no'; \
+      echo; \
+      echo '[www]'; \
+      echo 'listen = 9000'; \
+    } | tee php-fpm.d/zz-docker.conf \
   && { \
       echo 'opcache.memory_consumption=128'; \
       echo 'opcache.interned_strings_buffer=8'; \
@@ -206,13 +210,13 @@ RUN set -x \
       echo 'opcache.enable_cli=1'; \
     } > /usr/local/etc/php/conf.d/opcache-recommended.ini \
   && { \
-    echo 'memory_limit=256M'; \
-    echo 'upload_max_filesize=50M'; \
-    echo 'post_max_size=100M'; \
-    echo 'max_execution_time=600'; \
-    echo 'default_socket_timeout=3600'; \
-    echo 'request_terminate_timeout=600'; \
-  } > /usr/local/etc/php/conf.d/options.ini
+      echo 'memory_limit=256M'; \
+      echo 'upload_max_filesize=50M'; \
+      echo 'post_max_size=100M'; \
+      echo 'max_execution_time=600'; \
+      echo 'default_socket_timeout=3600'; \
+      echo 'request_terminate_timeout=600'; \
+    } > /usr/local/etc/php/conf.d/options.ini
 
-COPY docker-entrypoint.sh /usr/local/bin/
+CMD ["php-fpm"]
 ENTRYPOINT ["docker-entrypoint.sh"]
