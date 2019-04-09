@@ -4,14 +4,17 @@ LABEL maintainer="metowolf <i@i-meto.com>"
 
 ARG PHP_VERSION=7.3.4
 ARG GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6
-ARG COMPOSER_VERSION=1.8.4
+ARG COMPOSER_VERSION=1.8.5
 
 RUN apk add --no-cache gnupg1 curl \
   && mkdir -p /usr/src \
   && cd /usr/src \
-  # https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror
-  && curl -fSL https://downloads.php.net/~cmb/php-$PHP_VERSION.tar.xz -o php.tar.xz \
-  && curl -fSL https://downloads.php.net/~cmb/php-$PHP_VERSION.tar.xz.asc -o php.tar.xz.asc \
+  # Offical
+  && curl -fSL https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror -o php.tar.xz \
+  && curl -fSL https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror -o php.tar.xz.asc \
+  # CMB RC
+  # && curl -fSL https://downloads.php.net/~cmb/php-$PHP_VERSION.tar.xz -o php.tar.xz \
+  # && curl -fSL https://downloads.php.net/~cmb/php-$PHP_VERSION.tar.xz.asc -o php.tar.xz.asc \
   && export GNUPGHOME="$(mktemp -d)" \
   && found=''; \
   for server in \
@@ -151,11 +154,9 @@ RUN apk add --no-cache \
 
 FROM alpine:3.9
 
-COPY --from=builder /usr/local/ /usr/local/
-COPY docker-entrypoint.sh /usr/local/bin/
+LABEL maintainer="metowolf <i@i-meto.com>"
 
-WORKDIR /var/www/html
-EXPOSE 9000
+COPY --from=builder /usr/local/ /usr/local/
 
 RUN set -x \
   && runDeps="$( \
@@ -218,5 +219,10 @@ RUN set -x \
       echo 'request_terminate_timeout=600'; \
     } > /usr/local/etc/php/conf.d/options.ini
 
-CMD ["php-fpm"]
+WORKDIR /var/www/html
+
+COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE 9000
+CMD ["php-fpm"]

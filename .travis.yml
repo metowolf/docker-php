@@ -8,10 +8,3 @@ services:
 script:
   - chmod +x build.sh
   - ./build.sh
-
-notifications:
-  email:
-    recipients:
-      - i@i-meto.com
-    on_success: always
-    on_failure: always
