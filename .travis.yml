@@ -5,6 +5,14 @@ language: bash
 services:
   - docker
 
+env:
+  global:
+  - IMAGE_NAME=metowolf/php
+  - VERSION_KEYWORD="ARG PHP_VERSION="
+
+before_install:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
 script:
   - chmod +x build.sh
   - ./build.sh
