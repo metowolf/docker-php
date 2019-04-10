@@ -11,7 +11,7 @@ docker images
 
 if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
 
-  if [ "$TRAVIS_BRANCH" == "master" ]; then
+  if [ "$TRAVIS_BRANCH" = "master" ]; then
 
     docker tag ${IMAGE_NAME}:travis ${IMAGE_NAME}:latest
     docker push ${IMAGE_NAME}:latest
@@ -22,9 +22,17 @@ if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
     docker tag ${IMAGE_NAME}:travis ${IMAGE_NAME}:${MAJOR}.${MINOR}
     docker push ${IMAGE_NAME}:${MAJOR}.${MINOR}
 
-  fi
+    docker tag ${IMAGE_NAME}:travis ${IMAGE_NAME}:${VERSION}
+    docker push ${IMAGE_NAME}:${VERSION}
 
-  docker tag ${IMAGE_NAME}:travis ${IMAGE_NAME}:$VERSION
-  docker push ${IMAGE_NAME}:$VERSION
+  else
+
+    docker tag ${IMAGE_NAME}:travis ${IMAGE_NAME}:dev
+    docker push ${IMAGE_NAME}:dev
+
+    docker tag ${IMAGE_NAME}:travis ${IMAGE_NAME}:${VERSION}-dev
+    docker push ${IMAGE_NAME}:${VERSION}-dev
+
+  fi
 
 fi
