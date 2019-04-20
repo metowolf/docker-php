@@ -3,32 +3,19 @@ FROM alpine:3.9 as builder
 LABEL maintainer="metowolf <i@i-meto.com>"
 
 ARG PHP_VERSION=7.3.4
-ARG GPG_KEYS=CBAF69F173A0FEA4B537F470D66C9593118BCCB6
+ARG GPG_KEYS="CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D"
 ARG COMPOSER_VERSION=1.8.5
 
-RUN apk add --no-cache gnupg1 curl \
+RUN apk add --no-cache gnupg \
   && mkdir -p /usr/src \
   && cd /usr/src \
-  # Offical
-  && curl -fSL https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror -o php.tar.xz \
-  && curl -fSL https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror -o php.tar.xz.asc \
-  # CMB RC
-  # && curl -fSL https://downloads.php.net/~cmb/php-$PHP_VERSION.tar.xz -o php.tar.xz \
-  # && curl -fSL https://downloads.php.net/~cmb/php-$PHP_VERSION.tar.xz.asc -o php.tar.xz.asc \
-  && export GNUPGHOME="$(mktemp -d)" \
-  && found=''; \
-  for server in \
-    ha.pool.sks-keyservers.net \
-    hkp://keyserver.ubuntu.com:80 \
-    hkp://p80.pool.sks-keyservers.net:80 \
-    pgp.mit.edu \
-  ; do \
-    echo "Fetching GPG key $GPG_KEYS from $server"; \
-    gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
-  done; \
-  test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
-  gpg --batch --verify php.tar.xz.asc php.tar.xz \
-  && rm -rf "$GNUPGHOME" php.tar.xz.asc
+  && wget -O php.tar.xz https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror \
+  && wget -O php.tar.xz.asc https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror \
+  && export GNUPGHOME="$(mktemp -d)"; \
+  for key in $GPG_KEYS; do \
+    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+  done \
+  && gpg --batch --verify php.tar.xz.asc php.tar.xz
 
 COPY docker-php-source /usr/local/bin/
 ENV PHP_INI_DIR /usr/local/etc/php
@@ -148,7 +135,7 @@ RUN apk add --no-cache \
   && pecl install redis && docker-php-ext-enable redis \
   && pecl install imagick && docker-php-ext-enable imagick \
   && docker-php-ext-enable sodium \
-  && curl -L -o /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar \
+  && wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar \
   && chmod a+x /usr/local/bin/composer
 
 
