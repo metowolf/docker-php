@@ -113,7 +113,6 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     libxpm-dev \
     freetype-dev \
-  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd \
   && docker-php-ext-configure gd \
     --with-gd \
     --with-webp-dir=/usr \
@@ -123,6 +122,7 @@ RUN apk add --no-cache \
     --with-xpm-dir=/usr \
     --with-freetype-dir=/usr \
     --enable-gd-jis-conv \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd \
 	&& (rm -rf /usr/local/lib/php/test/gd || true) \
 	&& (rm -rf /usr/local/lib/php/doc/gd || true)
 
