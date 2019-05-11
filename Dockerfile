@@ -90,53 +90,183 @@ RUN set -xe \
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
+# apcu
+RUN pecl install apcu \
+	&& docker-php-ext-enable apcu \
+	&& (rm -rf /usr/local/lib/php/test/apcu || true) \
+	&& (rm -rf /usr/local/lib/php/doc/apcu || true)
+
+# bcmath
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) bcmath \
+	&& (rm -rf /usr/local/lib/php/test/bcmath || true) \
+	&& (rm -rf /usr/local/lib/php/doc/bcmath || true)
+
+# exif
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) exif \
+	&& (rm -rf /usr/local/lib/php/test/exif || true) \
+	&& (rm -rf /usr/local/lib/php/doc/exif || true)
+
+# gd
 RUN apk add --no-cache \
-    libzip libzip-dev \
-    openssl openssl-dev \
-    freetype freetype-dev \
-    libpng libpng-dev \
-    libjpeg-turbo libjpeg-turbo-dev \
-    libintl \
-    icu icu-dev \
-    libxslt libxslt-dev \
-    libxml2-dev \
-    gettext-dev \
-    tidyhtml-dev \
-    imagemagick-dev \
-    postgresql-dev \
+    libpng-dev \
+    libwebp-dev \
+    libjpeg-turbo-dev \
+    libxpm-dev \
+    freetype-dev \
   && docker-php-ext-configure gd \
-    --with-freetype-dir=/usr/include/ \
-    --with-jpeg-dir=/usr/include/ \
-    --with-png-dir=/usr/include/ \
-  && docker-php-ext-configure opcache \
-    --enable-opcache \
-  && docker-php-ext-install \
-    bcmath \
-    exif \
-    gd \
-    gettext \
-    iconv \
-    intl \
-    mysqli \
-    opcache \
-    pcntl \
-    pdo_mysql \
-    pdo_pgsql \
-    pgsql \
-    shmop \
-    soap \
-    sockets \
-    sysvsem \
-    tidy \
-    tokenizer \
-    xmlrpc \
-    xsl \
-    zip \
-  && pecl install redis && docker-php-ext-enable redis \
-  && pecl install imagick && docker-php-ext-enable imagick \
-  && docker-php-ext-enable sodium \
-  && wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar \
+    --with-gd \
+    --with-webp-dir=/usr \
+    --with-jpeg-dir=/usr \
+    --with-png-dir=/usr \
+    --with-zlib-dir=/usr \
+    --with-xpm-dir=/usr \
+    --with-freetype-dir=/usr \
+    --enable-gd-jis-conv \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd \
+	&& (rm -rf /usr/local/lib/php/test/gd || true) \
+	&& (rm -rf /usr/local/lib/php/doc/gd || true)
+
+# gettext
+RUN apk add --no-cache \
+    gettext-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gettext \
+	&& (rm -rf /usr/local/lib/php/test/gettext || true) \
+	&& (rm -rf /usr/local/lib/php/doc/gettext || true)
+
+# gmp
+RUN apk add --no-cache \
+    gmp-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gmp \
+	&& (rm -rf /usr/local/lib/php/test/gmp || true) \
+	&& (rm -rf /usr/local/lib/php/doc/gmp || true)
+
+# imagick
+RUN apk add --no-cache \
+    imagemagick-dev \
+  && pecl install imagick \
+  && docker-php-ext-enable imagick \
+	&& (rm -rf /usr/local/lib/php/test/imagick || true) \
+	&& (rm -rf /usr/local/lib/php/doc/imagick || true)
+
+# intl
+RUN apk add --no-cache \
+    icu-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) intl \
+	&& (rm -rf /usr/local/lib/php/test/intl || true) \
+	&& (rm -rf /usr/local/lib/php/doc/intl || true)
+
+# mysqli
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mysqli \
+	&& (rm -rf /usr/local/lib/php/test/mysqli || true) \
+	&& (rm -rf /usr/local/lib/php/doc/mysqli || true)
+
+# opcache
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) opcache \
+	&& (rm -rf /usr/local/lib/php/test/opcache || true) \
+	&& (rm -rf /usr/local/lib/php/doc/opcache || true)
+
+# pcntl
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pcntl \
+	&& (rm -rf /usr/local/lib/php/test/pcntl || true) \
+	&& (rm -rf /usr/local/lib/php/doc/pcntl || true)
+
+# pdo_mysql
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pdo_mysql \
+	&& (rm -rf /usr/local/lib/php/test/pdo_mysql || true) \
+	&& (rm -rf /usr/local/lib/php/doc/pdo_mysql || true)
+
+# pdo_pgsql
+RUN apk add --no-cache \
+    postgresql-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pdo_pgsql \
+	&& (rm -rf /usr/local/lib/php/test/pdo_pgsql || true) \
+	&& (rm -rf /usr/local/lib/php/doc/pdo_pgsql || true)
+
+# pgsql
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pgsql \
+	&& (rm -rf /usr/local/lib/php/test/pgsql || true) \
+	&& (rm -rf /usr/local/lib/php/doc/pgsql || true)
+
+# redis
+RUN pecl install redis \
+	&& docker-php-ext-enable redis \
+	&& (rm -rf /usr/local/lib/php/test/redis || true) \
+	&& (rm -rf /usr/local/lib/php/doc/redis || true)
+
+# shmop
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) shmop \
+	&& (rm -rf /usr/local/lib/php/test/shmop || true) \
+	&& (rm -rf /usr/local/lib/php/doc/shmop || true)
+
+# soap
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) soap \
+	&& (rm -rf /usr/local/lib/php/test/soap || true) \
+	&& (rm -rf /usr/local/lib/php/doc/soap || true)
+
+# sockets
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) sockets \
+	&& (rm -rf /usr/local/lib/php/test/sockets || true) \
+	&& (rm -rf /usr/local/lib/php/doc/sockets || true)
+
+# sodium
+RUN docker-php-ext-enable sodium \
+	&& (rm -rf /usr/local/lib/php/test/sodium || true) \
+	&& (rm -rf /usr/local/lib/php/doc/sodium || true)
+
+# swoole
+RUN apk add --no-cache \
+    git \
+  && git clone https://github.com/swoole/swoole-src /tmp/swoole \
+	&& cd /tmp/swoole \
+	&& git checkout $(git describe --abbrev=0 --tags) \
+	&& phpize \
+  && ./configure \
+    --enable-openssl \
+    --enable-sockets \
+    --enable-http2 \
+    --enable-mysqlnd \
+    --enable-coroutine-postgresql \
+  && make -j$(getconf _NPROCESSORS_ONLN) \
+  && make install \
+	&& docker-php-ext-enable swoole \
+	&& (rm -rf /usr/local/lib/php/test/swoole || true) \
+	&& (rm -rf /usr/local/lib/php/doc/swoole || true)
+
+# sysvsem
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) sysvsem \
+	&& (rm -rf /usr/local/lib/php/test/sysvsem || true) \
+	&& (rm -rf /usr/local/lib/php/doc/sysvsem || true)
+
+# tidy
+RUN apk add --no-cache \
+    tidyhtml-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) tidy \
+	&& (rm -rf /usr/local/lib/php/test/tidy || true) \
+	&& (rm -rf /usr/local/lib/php/doc/tidy || true)
+
+# xmlrpc
+RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) xmlrpc \
+	&& (rm -rf /usr/local/lib/php/test/xmlrpc || true) \
+	&& (rm -rf /usr/local/lib/php/doc/xmlrpc || true)
+
+# xsl
+RUN apk add --no-cache \
+    libxslt-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) xsl \
+	&& (rm -rf /usr/local/lib/php/test/xsl || true) \
+	&& (rm -rf /usr/local/lib/php/doc/xsl || true)
+
+# zip
+RUN apk add --no-cache \
+    libzip-dev \
+  && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) zip \
+	&& (rm -rf /usr/local/lib/php/test/zip || true) \
+	&& (rm -rf /usr/local/lib/php/doc/zip || true)
+
+# composer
+RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar \
   && chmod a+x /usr/local/bin/composer
+
 
 
 FROM alpine:3.9
