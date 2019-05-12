@@ -84,14 +84,21 @@ RUN set -xe \
     | sort -u \
     | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
     )" \
-  && apk add --no-cache $runDeps \
-  && pecl update-channels \
-  && rm -rf /tmp/pear ~/.pearrc
+  && apk add --no-cache $runDeps
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
+# pickle
+RUN wget -O /usr/bin/pickle https://github.com/FriendsOfPHP/pickle/releases/download/v0.4.0/pickle.phar \
+  && chmod a+x /usr/bin/pickle
+
 # apcu
-RUN pecl install apcu \
+RUN (pickle install apcu -n --defaults || true) \
+  && cd /tmp/apcu/apcu* \
+  && phpize \
+  && ./configure \
+  && make -j$(getconf _NPROCESSORS_ONLN) \
+  && make install \
 	&& docker-php-ext-enable apcu \
 	&& (rm -rf /usr/local/lib/php/test/apcu || true) \
 	&& (rm -rf /usr/local/lib/php/doc/apcu || true)
@@ -143,7 +150,12 @@ RUN apk add --no-cache \
 # imagick
 RUN apk add --no-cache \
     imagemagick-dev \
-  && pecl install imagick \
+  && (pickle install imagick -n --defaults || true) \
+  && cd /tmp/imagick/imagick* \
+  && phpize \
+  && ./configure \
+  && make -j$(getconf _NPROCESSORS_ONLN) \
+  && make install \
   && docker-php-ext-enable imagick \
 	&& (rm -rf /usr/local/lib/php/test/imagick || true) \
 	&& (rm -rf /usr/local/lib/php/doc/imagick || true)
@@ -188,7 +200,12 @@ RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) pgsql \
 	&& (rm -rf /usr/local/lib/php/doc/pgsql || true)
 
 # redis
-RUN pecl install redis \
+RUN (pickle install redis -n --defaults || true) \
+  && cd /tmp/redis/redis* \
+	&& phpize \
+  && ./configure \
+  && make -j$(getconf _NPROCESSORS_ONLN) \
+  && make install \
 	&& docker-php-ext-enable redis \
 	&& (rm -rf /usr/local/lib/php/test/redis || true) \
 	&& (rm -rf /usr/local/lib/php/doc/redis || true)
@@ -214,11 +231,8 @@ RUN docker-php-ext-enable sodium \
 	&& (rm -rf /usr/local/lib/php/doc/sodium || true)
 
 # swoole
-RUN apk add --no-cache \
-    git \
-  && git clone https://github.com/swoole/swoole-src /tmp/swoole \
-	&& cd /tmp/swoole \
-	&& git checkout $(git describe --abbrev=0 --tags) \
+RUN (pickle install swoole -n --defaults || true) \
+  && cd /tmp/swoole/swoole* \
 	&& phpize \
   && ./configure \
     --enable-openssl \
