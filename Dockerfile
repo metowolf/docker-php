@@ -281,6 +281,9 @@ RUN apk add --no-cache \
 RUN wget -O /usr/local/bin/composer https://getcomposer.org/download/$COMPOSER_VERSION/composer.phar \
   && chmod a+x /usr/local/bin/composer
 
+# strip extensions
+RUN strip --strip-all `php-config --extension-dir`/*.so
+
 
 
 FROM alpine:3.9
