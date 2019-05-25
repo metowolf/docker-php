@@ -29,6 +29,7 @@ intl
 json
 libxml
 mbstring
+memcached
 mysqli
 mysqlnd
 openssl

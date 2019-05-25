@@ -23,12 +23,9 @@ ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -xe \
   && apk add --no-cache \
     autoconf \
-    dpkg-dev dpkg \
-    file \
-    g++ \
-    gcc \
-    libc-dev \
-    make \
+    build-base \
+    dpkg \
+    dpkg-dev \
     pkgconf \
     re2c \
     argon2-dev \
@@ -166,6 +163,19 @@ RUN apk add --no-cache \
   && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) intl \
 	&& (rm -rf /usr/local/lib/php/test/intl || true) \
 	&& (rm -rf /usr/local/lib/php/doc/intl || true)
+
+# memcached
+RUN apk add --no-cache \
+    libmemcached-dev \
+  && (pickle install memcached -n --defaults || true) \
+  && cd /tmp/memcached/memcached* \
+  && phpize \
+  && ./configure \
+  && make -j$(getconf _NPROCESSORS_ONLN) \
+  && make install \
+	&& docker-php-ext-enable memcached \
+	&& (rm -rf /usr/local/lib/php/test/memcached || true) \
+	&& (rm -rf /usr/local/lib/php/doc/memcached || true)
 
 # mysqli
 RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) mysqli \
