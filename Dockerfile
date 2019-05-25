@@ -13,7 +13,7 @@ RUN apk add --no-cache gnupg \
   && wget -O php.tar.xz.asc https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror \
   && export GNUPGHOME="$(mktemp -d)"; \
   for key in $GPG_KEYS; do \
-    gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
   done \
   && gpg --batch --verify php.tar.xz.asc php.tar.xz
 
