@@ -1,8 +1,8 @@
-FROM alpine:3.9 as builder
+FROM alpine:edge as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
-ARG PHP_VERSION=7.3.7
+ARG PHP_VERSION=7.3.8
 ARG GPG_KEYS="CBAF69F173A0FEA4B537F470D66C9593118BCCB6 F38252826ACD957EF380D39F2F7956BC5DA04B5D"
 ARG COMPOSER_VERSION=1.8.6
 
@@ -296,7 +296,7 @@ RUN strip --strip-all `php-config --extension-dir`/*.so
 
 
 
-FROM alpine:3.9
+FROM alpine:3.10
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
