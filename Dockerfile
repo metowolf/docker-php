@@ -1,4 +1,4 @@
-FROM alpine:edge as builder
+FROM alpine:3.10 as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
