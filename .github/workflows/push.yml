@@ -12,4 +12,5 @@ jobs:
         username: metowolf
         password: ${{ secrets.DOCKER_TOKEN }}
         repository: metowolf/php
+        cache: metowolf/php
         auto_tag: true
