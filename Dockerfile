@@ -2,7 +2,7 @@ FROM alpine:3.10 as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
-ARG PHP_VERSION=7.3.11
+ARG PHP_VERSION=7.4.0RC5
 ARG COMPOSER_VERSION=1.9.1
 
 ENV PHP_INI_DIR /usr/local/etc/php
@@ -12,12 +12,12 @@ RUN set -ex \
   && apk add --no-cache gnupg \
   && mkdir -p /usr/src \
   && cd /usr/src \
-  && wget -O php.tar.xz https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror \
-  && wget -O php.tar.xz.asc https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror \
+  && wget -O php.tar.xz https://downloads.php.net/~derick/php-$PHP_VERSION.tar.xz \
+  && wget -O php.tar.xz.asc https://downloads.php.net/~derick/php-$PHP_VERSION.tar.xz.asc \
   && export GNUPGHOME="$(mktemp -d)"; \
     for key in \
-      CBAF69F173A0FEA4B537F470D66C9593118BCCB6 \
-      F38252826ACD957EF380D39F2F7956BC5DA04B5D \
+      42670A7FE4D0441C8E4632349E4FDC074A4EF02D \
+      5A52880781F755608BF815FC910DEB46F53EA312 \
     ; do \
       gpg --batch --keyserver ha.pool.sks-keyservers.net --keyserver-options timeout=10 --recv-keys "$key" || \
       gpg --batch --keyserver hkp://ipv4.pool.sks-keyservers.net --keyserver-options timeout=10 --recv-keys "$key" || \
@@ -41,6 +41,8 @@ RUN set -xe \
     libedit-dev \
     openssl-dev \
     libsodium-dev \
+    linux-headers \
+    oniguruma-dev \
     libxml2-dev \
     sqlite-dev \
   \
@@ -70,6 +72,7 @@ RUN set -xe \
     --with-libedit \
     --with-openssl \
     --with-zlib \
+    --with-pear \
     --enable-fpm \
     --with-fpm-user=www-data \
     --with-fpm-group=www-data \
@@ -283,6 +286,7 @@ RUN docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) xmlrpc \
 # xsl
 RUN apk add --no-cache \
     libxslt-dev \
+    libgcrypt-dev \
   && docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) xsl \
   && (rm -rf /usr/local/lib/php/test/xsl || true) \
   && (rm -rf /usr/local/lib/php/doc/xsl || true)
