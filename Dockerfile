@@ -2,7 +2,7 @@ FROM alpine:3.10 as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
-ARG PHP_VERSION=7.4.0RC6
+ARG PHP_VERSION=7.4.0
 ARG COMPOSER_VERSION=1.9.1
 
 ENV PHP_INI_DIR /usr/local/etc/php
@@ -12,8 +12,8 @@ RUN set -ex \
   && apk add --no-cache gnupg \
   && mkdir -p /usr/src \
   && cd /usr/src \
-  && wget -O php.tar.xz https://downloads.php.net/~derick/php-$PHP_VERSION.tar.xz \
-  && wget -O php.tar.xz.asc https://downloads.php.net/~derick/php-$PHP_VERSION.tar.xz.asc \
+  && wget -O php.tar.xz https://secure.php.net/get/php-$PHP_VERSION.tar.xz/from/this/mirror \
+  && wget -O php.tar.xz.asc https://secure.php.net/get/php-$PHP_VERSION.tar.xz.asc/from/this/mirror \
   && export GNUPGHOME="$(mktemp -d)"; \
     for key in \
       42670A7FE4D0441C8E4632349E4FDC074A4EF02D \
