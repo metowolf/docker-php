@@ -2,7 +2,7 @@ FROM alpine:3.11 as builder
 
 LABEL maintainer="metowolf <i@i-meto.com>"
 
-ARG PHP_VERSION=7.4.5
+ARG PHP_VERSION=7.4.6
 ARG COMPOSER_VERSION=1.10.6
 
 ENV PHP_INI_DIR /usr/local/etc/php
