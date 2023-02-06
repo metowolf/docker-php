@@ -24,6 +24,7 @@ gettext
 gmp
 hash
 iconv
+igbinary
 imagick
 intl
 json
@@ -54,13 +55,11 @@ sodium
 SPL
 sqlite3
 standard
-swoole
 sysvsem
 tidy
 tokenizer
 xml
 xmlreader
-xmlrpc
 xmlwriter
 xsl
 Zend OPcache
